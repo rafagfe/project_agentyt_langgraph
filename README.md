@@ -6,8 +6,13 @@
 
 **Created at: 30/10/2024**
 
-##
 ## Instalation after to clone repo
+```
+git clone https://github.com/rafagfe/project_agentyt_langgraph.git
+```
+```
+cd project_agentyt_langgraph
+```
 ```
 sudo docker-compose up -d --build
 ```
