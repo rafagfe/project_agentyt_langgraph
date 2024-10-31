@@ -6,7 +6,7 @@
 
 **Created at: 30/10/2024**
 
-## Instalation after to clone repo
+## Instalation
 ```
 git clone https://github.com/rafagfe/project_agentyt_langgraph.git
 ```
