@@ -1,5 +1,9 @@
 # YouTube Video Analysis with OpenAI and LangGraph
 
+### Author
+**Rafael G. Fernandes**  
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/rafael-g-fernandes/)
+
 ## Purpose of the Project
 This project automates the analysis of YouTube videos by downloading audio, transcribing content, and applying various analyses like sentiment, relevance, and depth. It provides structured reports in Markdown and HTML formats, utilizing OpenAI's language models within a structured workflow.
 
@@ -48,6 +52,11 @@ The **Q&A Assistant** tab lets users ask questions about the analyzed video cont
 - **Ask a Question**: Users can input questions about specific content aspects.
 - **Answer Generation**: Uses the video analysis data to generate concise answers.
 - **Chat History**: Displays previous questions and answers, allowing users to track the session’s conversation history.
+
+## 4 - Tab 3: Contact Me
+The **Contact Me** tab displays the author's contact information. It includes:
+- **Name**: Displays the author's name (e.g., "Rafael G. Fernandes").
+- **LinkedIn Icon**: A clickable LinkedIn icon that links to the author's LinkedIn profile, allowing users to connect or learn more about the author.
 
 ---
 
