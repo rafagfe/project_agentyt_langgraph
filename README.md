@@ -4,6 +4,9 @@
 **Rafael G. Fernandes**  
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/rafael-g-fernandes/)
 
+**Created at: 30/10/2024**
+
+##
 ## Purpose of the Project
 This project automates the analysis of YouTube videos by downloading audio, transcribing content, and applying various analyses like sentiment, relevance, and depth. It provides structured reports in Markdown and HTML formats, utilizing OpenAI's language models within a structured workflow.
 
