@@ -7,6 +7,11 @@
 **Created at: 30/10/2024**
 
 ##
+## Instalation after to clone repo
+```
+sudo docker-compose up -d --build
+```
+
 ## Purpose of the Project
 This project automates the analysis of YouTube videos by downloading audio, transcribing content, and applying various analyses like sentiment, relevance, and depth. It provides structured reports in Markdown and HTML formats, utilizing OpenAI's language models within a structured workflow.
 
