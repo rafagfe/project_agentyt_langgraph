@@ -1,0 +1,16 @@
+# Core dependencies
+langchain-core
+langgraph
+langchain-openai
+openai
+yt-dlp
+streamlit
+tiktoken
+
+# File and data handling
+python-dotenv
+markdown
+pydub
+
+# Logging and path management
+python-dateutil
