@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class VectorStoreManager:
-    def __init__(self, api_key: str, similarity_threshold: float = 0.85):
+    def __init__(self, api_key: str, similarity_threshold: float = 0.90):
         """
         Initialize the vector store manager.
         
