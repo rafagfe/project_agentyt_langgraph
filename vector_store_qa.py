@@ -1,3 +1,24 @@
+# -*- coding: utf-8 -*-
+
+# This script manages a vector store for question-answer (Q&A) retrieval
+# using OpenAI embeddings to calculate text similarity.
+
+# The script defines the VectorStoreManager class, which provides methods to:
+# 1. Initialize the vector store using the Chroma library and OpenAI embeddings.
+#    - The vector store is saved in a persistent directory ("./chroma_db").
+# 2. Add question-answer pairs to the vector store.
+#    - Each pair is indexed, enabling future similarity-based searches.
+# 3. Perform similarity searches for questions within the vector store:
+#    - Upon receiving a new question, it searches for similar questions with a minimum similarity score
+#      (defined by a similarity threshold).
+#    - Returns the original question, answer, and similarity score if a suitable match is found.
+# 4. Clear all data from the vector store:
+#    - Deletes all data from the current collection and creates a new empty collection.
+
+# Additionally, the script includes error handling and logging to monitor for issues in initialization,
+# search, data addition, and data deletion operations in the vector store.
+
+
 from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 from typing import Optional, Tuple
@@ -9,7 +30,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class VectorStoreManager:
-    def __init__(self, api_key: str, similarity_threshold: float = 0.90):
+    def __init__(self, api_key: str, similarity_threshold: float = 0.85):
         """
         Initialize the vector store manager.
         
@@ -17,6 +38,7 @@ class VectorStoreManager:
             api_key: OpenAI API key for embeddings
             similarity_threshold: Minimum similarity score to consider a match (0-1)
         """
+        self.api_key = api_key  # Armazena a API key para comparação
         self.embeddings = OpenAIEmbeddings(api_key=api_key)
         self.similarity_threshold = similarity_threshold
         self.persist_directory = "./chroma_db"
@@ -106,13 +128,16 @@ class VectorStoreManager:
     def clear_vector_store(self):
         """Clear all data from the vector store."""
         try:
-            # Delete the persist directory
-            import shutil
-            if os.path.exists(self.persist_directory):
-                shutil.rmtree(self.persist_directory)
+            # Ao invés de deletar o diretório e reinicializar,
+            # vamos deletar todos os dados da coleção atual
+            self.vector_store.delete_collection()
             
-            # Reinitialize the vector store
-            self._initialize_vector_store()
+            # Criar uma nova coleção vazia
+            self.vector_store = Chroma(
+                persist_directory=self.persist_directory,
+                embedding_function=self.embeddings,
+            )
+            
             logger.info("Vector store cleared successfully")
             
         except Exception as e:
