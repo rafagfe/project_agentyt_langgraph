@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # This script processes YouTube videos by downloading, transcribing, and analyzing content for insights.
 # It uses a structured workflow to perform various tasks such as downloading the video, transcribing
 # audio, generating summaries, analyzing sentiment, relevance, depth, and providing a final evaluation score.
