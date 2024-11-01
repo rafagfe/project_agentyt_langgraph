@@ -60,11 +60,11 @@ The **Video Analysis** tab enables users to input a YouTube video URL for proces
 - **Download Options**: Allows users to download the results as HTML and Markdown reports.
 - **Workflow Visualization**: Displays a diagram of the workflow process for a clear understanding of each step.
 
-## Tab 2: Q&A Assistant
-The **Q&A Assistant** tab lets users ask questions about the analyzed video content. Key features include:
-- **Ask a Question**: Users can input questions about specific content aspects.
-- **Answer Generation**: Uses the video analysis data to generate concise answers.
-- **Chat History**: Displays previous questions and answers, allowing users to track the session’s conversation history.
+### Tab 2: Q&A Assistant with Vector Database Optimization
+The **Q&A Assistant** tab enables interactive Q&A on the analyzed video content with the following features:
+- **Ask a Question**: Users can pose questions about specific aspects of the video.
+- **Answer Generation with Caching**: Before generating a new response, the system checks ChromaDB for similar questions. If a match is found, it retrieves the cached answer, reducing the need for additional API calls.
+- **Chat History**: Displays past questions and answers, allowing users to review the session’s conversation.
 
 ## 4 - Tab 3: Contact Me
 The **Contact Me** tab displays the author's contact information. It includes:
