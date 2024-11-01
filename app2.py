@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # This script is a Streamlit-based web application for analyzing YouTube video content and answering questions
 # about it. It integrates with OpenAI's language models and a vector database to provide responses, track usage,
 # and optimize costs by caching similar queries.
@@ -391,30 +393,41 @@ with tab1:
         st.warning("README.md file not found.")
 
 # Q&A Assistant Tab
-# Q&A Assistant Tab
 with tab2:
     st.header("Ask About the Video")
     
     if st.session_state.video_content is None:
         st.warning("Please analyze a video first in the Video Analysis tab.")
+    elif not st.session_state.get("OPENAI_API_KEY"):
+        st.warning("Please enter your OpenAI API Key in the sidebar.")
     else:
-        # Initialize vector store if not already done
-        if st.session_state.vector_store is None:
-            st.session_state.vector_store = VectorStoreManager(
-                api_key=st.session_state.OPENAI_API_KEY
-            )
+        # Initialize vector store if not already done or if API key changed
+        current_api_key = st.session_state.get("OPENAI_API_KEY")
+        if (st.session_state.vector_store is None or 
+            getattr(st.session_state.vector_store, 'api_key', None) != current_api_key):
+            vector_store = VectorStoreManager(api_key=current_api_key)
+            try:
+                vector_store.clear_vector_store()
+                logger.info("Vector store cleared on initialization/API key change")
+            except Exception as e:
+                logger.error(f"Error clearing vector store: {str(e)}")
+            st.session_state.vector_store = vector_store
         
-        # Add clear vector store button
+        question = st.text_input("Ask a question about the video content:")
+        
+        # Botões lado a lado
         col1, col2 = st.columns([4, 1])
-        with col2:
-            if st.button("Clear Cache"):
-                st.session_state.vector_store.clear_vector_store()
-                st.success("Vector store cache cleared!")
         
         with col1:
-            question = st.text_input("Ask a question about the video content:")
+            get_answer = st.button("Get Answer", use_container_width=True)
         
-        if st.button("Get Answer"):
+        with col2:
+            if st.button("Clear Cache", use_container_width=True):
+                if st.session_state.vector_store:
+                    st.session_state.vector_store.clear_vector_store()
+                    st.success("Vector store cache cleared!")
+        
+        if get_answer:
             if not question:
                 st.warning("Please enter a question.")
             else:
@@ -422,7 +435,7 @@ with tab2:
                 full_response = ""
                 
                 with st.spinner("Generating answer..."):
-                    # Check vector store first
+                    # Try to get answer from cache first
                     cached_result = st.session_state.vector_store.find_similar_question(question)
                     
                     if cached_result:
@@ -449,11 +462,13 @@ with tab2:
                         
                         # Add to vector store
                         st.session_state.vector_store.add_qa_pair(question, full_response)
+                        logger.info("New Q&A pair added to vector store")
                     
                     # Add to chat history
                     st.session_state.chat_history.append({
                         "question": question,
-                        "answer": full_response
+                        "answer": full_response,
+                        "from_cache": bool(cached_result)
                     })
                     
                     # Force a page refresh to update statistics
@@ -462,9 +477,11 @@ with tab2:
         # Display chat history if available
         if st.session_state.chat_history:
             st.subheader("Chat History")
-            for chat in st.session_state.chat_history:
+            for chat in reversed(st.session_state.chat_history):
                 st.write(f"**Q:** {chat['question']}")
                 st.write(f"**A:** {chat['answer']}")
+                if chat.get('from_cache'):
+                    st.info("(Retrieved from cache)")
                 st.markdown("---")
 
 # Contact Me Tab
