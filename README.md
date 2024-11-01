@@ -63,7 +63,7 @@ The **Video Analysis** tab enables users to input a YouTube video URL for proces
 ### Tab 2: Q&A Assistant with Vector Database Optimization
 The **Q&A Assistant** tab enables interactive Q&A on the analyzed video content with the following features:
 - **Ask a Question**: Users can pose questions about specific aspects of the video.
-- **Answer Generation with Caching**: Before generating a new response, the system checks ChromaDB for similar questions. If a match is found, it retrieves the cached answer, reducing the need for additional API calls.
+- **Answer Generation with Caching**: Before generating a new response, the system checks ChromaDB for similar questions (> 95%). If a match is found, it retrieves the cached answer, reducing the need for additional API calls.
 - **Chat History**: Displays past questions and answers, allowing users to review the session’s conversation.
 
 ## 4 - Tab 3: Contact Me
