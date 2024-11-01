@@ -1,18 +1,22 @@
 # This script is a Streamlit-based web application for analyzing YouTube video content and answering questions
-# about it. It integrates with OpenAI's language models to provide responses and analyze text usage costs.
+# about it. It integrates with OpenAI's language models and a vector database to provide responses, track usage,
+# and optimize costs by caching similar queries.
 
 # Main Functionalities:
-# 1. **Token and Cost Tracking**: Calculates the token usage and associated costs based on input and output tokens
-#    for different OpenAI models, including a cost reset option.
+# 1. **Token and Cost Tracking**: Calculates token usage and associated costs for input and output tokens based on
+#    different OpenAI models, with a reset option for cost counters.
 # 2. **YouTube Video Analysis**: Accepts a YouTube video URL, processes the video content, and displays the analysis
-#    to the user. Supports HTML download of analysis results and displays a workflow diagram if available.
-# 3. **Q&A Assistant**: Enables users to ask questions about the analyzed video content. Answers are generated in 
-#    real-time by OpenAI models, and the session stores the question-answer history.
+#    to the user. Supports downloading of analysis results in HTML format and displays a workflow diagram if available.
+# 3. **Q&A Assistant with Vector Database Optimization**: Allows users to ask questions about the analyzed video content.
+#    Before generating a new answer, the application checks a vector database (ChromaDB) for similar questions previously
+#    asked, helping to reduce costs by retrieving answers from cache when a match is found.
 # 4. **Session State Management**: Maintains session-based data such as API keys, selected model, token tracker,
-#    chat history, and analysis content visibility.
-# 5. **Sidebar Configuration**: Provides API key input, model selection, and displays token usage and cost statistics.
+#    chat history, video content, and vector store, ensuring continuity across interactions.
+# 5. **Sidebar Configuration**: Provides input fields for API key and model selection, along with usage statistics
+#    for tokens and cost, keeping users informed of their usage.
 # 
-# This script uses logging for event tracking and handles errors gracefully, displaying messages for user guidance.
+# This script uses logging for event tracking and error handling, displaying messages to guide users in case of issues.
+
 
 
 import streamlit as st
@@ -26,6 +30,7 @@ from langchain_core.prompts import ChatPromptTemplate
 import tiktoken
 from dataclasses import dataclass
 from typing import Dict, Tuple
+from vector_store_qa import VectorStoreManager
 
 # Configure logging
 logging.basicConfig(
@@ -142,6 +147,8 @@ if 'token_tracker' not in st.session_state:
     st.session_state.token_tracker = TokenCostTracker()
 if 'show_analysis' not in st.session_state:
     st.session_state.show_analysis = False
+if 'vector_store' not in st.session_state:
+    st.session_state.vector_store = None
 
 # Setup sidebar configuration
 logger.info("Setting up sidebar configuration...")
@@ -304,6 +311,10 @@ with tab1:
                         st.session_state.video_content = None
                         st.session_state.chat_history = []
                         clear_output_directory(keep_content=False)
+                        
+                        # Clear vector store when starting new video analysis
+                        if st.session_state.vector_store:
+                            st.session_state.vector_store.clear_vector_store()
                     
                     # Reset token counter before new analysis
                     st.session_state.token_tracker.reset_counts()
@@ -380,13 +391,28 @@ with tab1:
         st.warning("README.md file not found.")
 
 # Q&A Assistant Tab
+# Q&A Assistant Tab
 with tab2:
     st.header("Ask About the Video")
     
     if st.session_state.video_content is None:
         st.warning("Please analyze a video first in the Video Analysis tab.")
     else:
-        question = st.text_input("Ask a question about the video content:")
+        # Initialize vector store if not already done
+        if st.session_state.vector_store is None:
+            st.session_state.vector_store = VectorStoreManager(
+                api_key=st.session_state.OPENAI_API_KEY
+            )
+        
+        # Add clear vector store button
+        col1, col2 = st.columns([4, 1])
+        with col2:
+            if st.button("Clear Cache"):
+                st.session_state.vector_store.clear_vector_store()
+                st.success("Vector store cache cleared!")
+        
+        with col1:
+            question = st.text_input("Ask a question about the video content:")
         
         if st.button("Get Answer"):
             if not question:
@@ -396,16 +422,33 @@ with tab2:
                 full_response = ""
                 
                 with st.spinner("Generating answer..."):
-                    for content in get_ai_response(
-                        question,
-                        st.session_state.video_content,
-                        st.session_state.OPENAI_API_KEY,
-                        st.session_state.model_llm
-                    ):
-                        full_response += content
-                        answer_placeholder.markdown(full_response + "▌")
+                    # Check vector store first
+                    cached_result = st.session_state.vector_store.find_similar_question(question)
                     
-                    answer_placeholder.markdown(full_response)
+                    if cached_result:
+                        original_question, cached_answer, similarity_score = cached_result
+                        full_response = cached_answer
+                        answer_placeholder.markdown(full_response)
+                        
+                        # Show cache info
+                        st.info(f"""Answer retrieved from cache!
+                        Similar question: "{original_question}"
+                        Similarity score: {similarity_score:.2%}""")
+                    else:
+                        # If not in cache, generate new answer
+                        for content in get_ai_response(
+                            question,
+                            st.session_state.video_content,
+                            st.session_state.OPENAI_API_KEY,
+                            st.session_state.model_llm
+                        ):
+                            full_response += content
+                            answer_placeholder.markdown(full_response + "▌")
+                        
+                        answer_placeholder.markdown(full_response)
+                        
+                        # Add to vector store
+                        st.session_state.vector_store.add_qa_pair(question, full_response)
                     
                     # Add to chat history
                     st.session_state.chat_history.append({
@@ -427,7 +470,7 @@ with tab2:
 # Contact Me Tab
 with tab3:
     st.subheader("Autor: Rafael G. Fernandes")
-    st.subheader("Criado em: 31/2/10/2024")
+    st.subheader("Criado em: 31/10/2024")
     st.subheader("Clique no ícone abaixo para ver meu perfil no LinkedIn:")
     
     linkedin_url = "https://www.linkedin.com/in/rafael-g-fernandes/"
@@ -439,7 +482,6 @@ with tab3:
         """,
         unsafe_allow_html=True
     )
-
 
 # Footer section for additional information or copyright
 st.markdown(
