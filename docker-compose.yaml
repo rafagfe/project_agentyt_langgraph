@@ -7,9 +7,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8510:8510"
-    #environment:
-    #  - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
-      - .:/app
+      - .:/app:rw
     container_name: yt_langgraph
     restart: always
+    environment:
+      - PYTHONPATH=/app
+    user: "1000:1000"
