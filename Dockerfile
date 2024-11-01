@@ -1,23 +1,43 @@
-# Usar uma imagem base com Python 3.9 (ou uma versão que você prefira)
 FROM python:3.9-slim
 
-# Definir o diretório de trabalho dentro do contêiner
+# Set the working directory
 WORKDIR /app
 
-# Instalar ffmpeg
-RUN apt-get update && apt-get install -y ffmpeg
+# Install necessary system dependencies
+RUN apt-get update && \
+    apt-get install -y \
+    ffmpeg \
+    build-essential \
+    python3-dev \
+    sqlite3 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copiar os arquivos de dependências para o diretório de trabalho
+# Create a non-root user
+RUN useradd -m -u 1000 appuser
+
+# Create necessary directories
+RUN mkdir -p /app/chroma_db /app/output
+
+# Copy the requirements file
 COPY requirements.txt .
 
-# Instalar as dependências
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar os arquivos da aplicação para o diretório de trabalho
+# Copy the application files
 COPY . .
 
-# Expor a porta padrão do Streamlit
+# Adjust permissions for the appuser
+RUN chown -R appuser:appuser /app && \
+    chmod -R 777 /app/chroma_db && \
+    chmod -R 777 /app/output
+
+# Switch to the non-root user
+USER appuser
+
+# Expose the port for Streamlit
 EXPOSE 8510
 
-# Executar o aplicativo Streamlit quando o contêiner iniciar
+# Run the application
 CMD ["streamlit", "run", "app2.py", "--server.port=8510", "--server.address=0.0.0.0"]
