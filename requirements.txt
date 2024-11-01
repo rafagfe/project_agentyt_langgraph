@@ -1,18 +1,13 @@
-# Core dependencies
-langchain-core
-langgraph
-langchain-openai
-openai
-yt-dlp
-streamlit
-tiktoken
-chromadb
-langchain-community
-
-# File and data handling
-python-dotenv
-markdown
-pydub
-
-# Logging and path management
-python-dateutil
+langchain-core==0.3.15
+langgraph==0.2.43
+langchain-openai==0.2.5
+openai==1.53.0
+yt-dlp==2024.10.22
+streamlit==1.39.0
+tiktoken==0.8.0
+chromadb==0.5.17
+langchain-community==0.3.4
+python-dotenv==1.0.1
+Markdown==3.7
+pydub==0.25.1
+python-dateutil==2.9.0.post0
