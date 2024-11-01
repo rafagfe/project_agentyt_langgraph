@@ -6,6 +6,8 @@ openai
 yt-dlp
 streamlit
 tiktoken
+chromadb==0.5.17
+langchain-community==0.3.4
 
 # File and data handling
 python-dotenv
